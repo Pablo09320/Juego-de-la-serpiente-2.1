@@ -8,6 +8,7 @@ let level = 0; // Nivel del juego
 let backgroundImage;
 let appleImg; // Variable para la imagen de la manzana
 let obstacleImg; // Variable para la imagen de los obstáculos
+let gameStarted = false; // Variable para controlar el inicio del juego
 
 function preload() {
     backgroundImage = loadImage('https://cdn.leonardo.ai/users/93c2b651-d59d-4b36-a34f-9bf3b29ab679/generations/38104637-ef38-44d6-a3b0-3245a1d4ecce/Leonardo_Diffusion_XL_grass_minimalist_background_checkerboard_3.jpg'); // Cambia la ruta por la ubicación de tu imagen
@@ -27,7 +28,10 @@ function setup() {
 
         // Función que se ejecuta en cada fotograma
 function draw() {
-    background(backgroundImage); // Establecer el fondo del lienzo
+    if (!gameStarted) {
+        showStartScreen(); // Mostrar la pantalla de inicio
+    } else {
+        background(backgroundImage); // Establecer el fondo del lienzo
     snake.move(); // Mover la serpiente
     snake.checkCollision(); // Verificar colisiones
     snake.update(); // Actualizar lógica del juego (opcional)
@@ -41,11 +45,6 @@ function draw() {
         }
     }
 
-    fill(255);
-    textSize(20);
-    text(`Puntos: ${score}`, 10, 30); // Mostrar la puntuación del jugador en pantalla
-
-
     // Dibujar obstáculos de color negro
      for (let obstacle of obstacles) {
         image(obstacleImg, obstacle.x, obstacle.y, 20, 20);
@@ -54,10 +53,23 @@ function draw() {
     image(appleImg, food.x, food.y, 20, 20);
     canChangeDirection = true; // Permitir cambios de dirección
     displayRanking();
+    }
+    
 }
 
+function showStartScreen() {
+    // Código para mostrar la pantalla de inicio
+    background(0); // Fondo negro
+    fill(255);
+    textSize(32);
+    textAlign(CENTER, CENTER);
+    text("Presiona Enter para empezar", width / 2, height / 2);
+}
 // Función para manejar las teclas presionadas
 function keyPressed() {
+    if (keyCode === ENTER && !gameStarted) {
+        gameStarted = true; // Iniciar el juego al presionar Enter
+    }
     if (canChangeDirection) {
         switch (keyCode) {
             // Cambiar dirección de la serpiente según la tecla presionada
@@ -227,12 +239,13 @@ class Snake {
 // Función para reiniciar el juego al detectar una colisión
 function displayRanking() {
     let ranking = JSON.parse(localStorage.getItem('snakeRanking')) || [];
-    textSize(20);
-    fill(255);
-    text('Ranking:', 500, 30); // Título del ranking
+    let scoreDiv = document.getElementById('score');
+    let rankingDiv = document.getElementById('ranking');
 
+    scoreDiv.innerText = `Puntos: ${score}`;
+    rankingDiv.innerHTML = 'Ranking:<br>';
     for (let i = 0; i < ranking.length && i < 3; i++) {
-        text(`Top ${i + 1}: ${ranking[i]}`, 500, 60 + i * 30); // Ajusta la posición x aquí
+        rankingDiv.innerHTML += `Top ${i + 1}: ${ranking[i]}<br>`;
     }
 }
 function resetGame() {
